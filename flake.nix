@@ -9,7 +9,7 @@
       pkgs = nixpkgs-stable.legacyPackages.x86_64-linux;
     in {
       execline = pkgs.buildEnv {
-        name = "execlineb";
+        name = "execline";
         paths = [];
         postBuild = ''
           mkdir -p $out/bin
@@ -17,7 +17,17 @@
           ln -s ${pkgs.execline}/bin/execline-cd $out/bin/
         '';
       };
+
+      devbox-run = pkgs.buildEnv {
+       name = "devbox-run";
+       paths = [
+         pkgs.devbox
+         self.packages.x86_64-linux.execline
+        ./devbox-run
+       ];
+     };
     };
+
     default = self.packages.x86_64-linux.execline;
   };
 }
