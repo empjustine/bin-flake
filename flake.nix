@@ -1,33 +1,33 @@
 {
-  inputs.nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-23.05";
+  inputs.nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-23.11";
   outputs = {
     self,
     nixpkgs-stable,
     ...
-  } @ inputs: {
-    packages.x86_64-linux = let
-      pkgs = nixpkgs-stable.legacyPackages.x86_64-linux;
-    in {
-      execline = pkgs.buildEnv {
+  } @ inputs: let
+    system = "x86_64-linux";
+  in {
+    packages.${system} = {
+      execline = nixpkgs-stable.legacyPackages.${system}.buildEnv {
         name = "execline";
         paths = [];
         postBuild = ''
           mkdir -p $out/bin
-          ln -s ${pkgs.execline}/bin/execlineb $out/bin/
-          ln -s ${pkgs.execline}/bin/execline-cd $out/bin/
+          ln -s ${nixpkgs-stable.legacyPackages.${system}.execline}/bin/execlineb $out/bin/
+          ln -s ${nixpkgs-stable.legacyPackages.${system}.execline}/bin/execline-cd $out/bin/
         '';
       };
 
-      devbox-run = pkgs.buildEnv {
-       name = "devbox-run";
-       paths = [
-         pkgs.devbox
-         self.packages.x86_64-linux.execline
-        ./devbox-run
-       ];
-     };
-    };
+      devbox-run = nixpkgs-stable.legacyPackages.${system}.buildEnv {
+        name = "devbox-run";
+        paths = [
+          ./devbox-run
+          self.packages.${system}.execline
+          nixpkgs-stable.legacyPackages.${system}.devbox
+        ];
+      };
 
-    default = self.packages.x86_64-linux.execline;
+      default = self.packages.${system}.execline;
+    };
   };
 }
